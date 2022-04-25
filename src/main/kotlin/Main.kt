@@ -16,34 +16,41 @@ val letters = listOf("h", "e", "l", "o", "c", "f", "f", "x", "y", "e")
 val words = listOf("hello", "coffee", "ley", "xyz")
 
 fun main(args: Array<String>) {
-    val results = mutableListOf<String>()
-    for (word in words) {
-        val usedIndices = HashSet<Int>()
-        for (characterIndex in word.indices) {
-            val currentIndexOfLetters = getIndexOfCharacter(word[characterIndex], usedIndices)
-            if (currentIndexOfLetters == -1) {
-                break
-            } else {
-                if (characterIndex == word.lastIndex) {
-                    results.add(word)
-                }
-                usedIndices.add(currentIndexOfLetters)
-            }
-        }
-
-    }
-
-    results.forEach {
-        println(it)
-    }
-
+    processWords(words, letters).forEach { println(it) }
 }
 
-fun getIndexOfCharacter(character: Char, usedIndices: HashSet<Int>): Int {
-    for (currentIndex in letters.indices) {
-        if (character == letters[currentIndex][0] && !usedIndices.contains(currentIndex)) {
-            return currentIndex
+fun processWords(words: List<String>, letters: List<String>): MutableList<String> {
+    val lettersHashMapCounter = mutableMapOf<Char, Int>()
+    val results = mutableListOf<String>()
+    letters transformInto lettersHashMapCounter
+
+    for (word in words) {
+        val myCurrentLettersMap = mutableMapOf<Char, Int>()
+        for (charIndex in word.indices) {
+            val currentChar = word[charIndex]
+            myCurrentLettersMap add currentChar
+            val currentLettersPair = Pair(currentChar, myCurrentLettersMap)
+            if (currentLettersPair hasSameLetterCounterThan lettersHashMapCounter) {
+                if (charIndex == word.lastIndex) {
+                    results.add(word)
+                }
+            } else break
         }
     }
-    return -1
+    return results
+}
+
+infix fun List<String>.transformInto(lettersHashMapCounter: MutableMap<Char, Int>) {
+    letters.forEach { lettersHashMapCounter add it[0] }
+}
+
+infix fun Pair<Char, MutableMap<Char, Int>>.hasSameLetterCounterThan(otherMap: MutableMap<Char, Int>): Boolean {
+    val charToValidate = this.first
+    return otherMap[charToValidate]?.let { otherMapValue ->
+        this.second[charToValidate]?.let { it <= otherMapValue }
+    } ?: false
+}
+
+infix fun MutableMap<Char, Int>.add(charLetter: Char) {
+    this[charLetter] = this[charLetter]?.let { it + 1 } ?: 1
 }
